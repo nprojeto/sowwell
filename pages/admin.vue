@@ -142,6 +142,60 @@ async function moverCasa(casa: any, planoId: string) {
   } catch (e: any) { erro.value = e.message }
 }
 
+// "abertos" já era usado nesta tela para outra coisa
+const familiasAbertas = ref<string[]>([])
+const procura = ref('')
+const ordem = ref<'recente' | 'uso' | 'nome' | 'parado'>('recente')
+
+// "há quanto tempo" em palavras, que lê melhor que uma data crua
+function desdeQuando(iso: any) {
+  if (!iso) return { texto: 'nunca entrou', dias: 99999 }
+  const dias = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000)
+  if (dias <= 0) return { texto: 'hoje', dias }
+  if (dias === 1) return { texto: 'ontem', dias }
+  if (dias < 30) return { texto: `há ${dias} dias`, dias }
+  if (dias < 60) return { texto: 'há mais de um mês', dias }
+  return { texto: `há ${Math.floor(dias / 30)} meses`, dias }
+}
+
+function corDoUso(pct: number) {
+  if (pct >= 70) return 'var(--entrada)'
+  if (pct >= 40) return 'var(--laranja)'
+  return 'var(--saida)'
+}
+
+// procura por nome da família ou por e-mail de qualquer mordomo
+const casasFiltradas = computed(() => {
+  const t = procura.value.trim().toLowerCase()
+  const lista = resumo.value?.casas ?? []
+  const achadas = !t ? lista : lista.filter((c: any) =>
+    String(c.nome ?? '').toLowerCase().includes(t)
+    || (c.membros ?? []).some((m: any) =>
+      String(m.email ?? '').toLowerCase().includes(t)
+      || String(m.nome ?? '').toLowerCase().includes(t)))
+
+  const copia = [...achadas]
+  if (ordem.value === 'uso') {
+    copia.sort((a: any, b: any) => (b.uso_pct ?? 0) - (a.uso_pct ?? 0))
+  } else if (ordem.value === 'nome') {
+    copia.sort((a: any, b: any) => String(a.nome).localeCompare(String(b.nome)))
+  } else if (ordem.value === 'parado') {
+    // quem sumiu primeiro: é onde o suporte precisa olhar
+    copia.sort((a: any, b: any) =>
+      desdeQuando(b.ultimo_acesso).dias - desdeQuando(a.ultimo_acesso).dias)
+  } else {
+    copia.sort((a: any, b: any) =>
+      desdeQuando(a.ultimo_acesso).dias - desdeQuando(b.ultimo_acesso).dias)
+  }
+  return copia
+})
+
+function alternarMembros(id: string) {
+  const i = familiasAbertas.value.indexOf(id)
+  if (i >= 0) familiasAbertas.value.splice(i, 1)
+  else familiasAbertas.value.push(id)
+}
+
 const prazo = ref<any>(null)
 const dataPrazo = ref('')
 const salvandoPrazo = ref(false)
@@ -245,18 +299,54 @@ onMounted(carregar)
             <span class="pequeno mudo">
               {{ resumo.total_casas }} no total · {{ resumo.vencidas }} vencida(s)
             </span>
+        </div>
+        <div style="padding:12px 20px;border-bottom:1px solid var(--linha)">
+          <input v-model="procura" placeholder="Procurar por família ou e-mail" />
+
+          <div class="linha-flex" style="margin-top:10px;flex-wrap:wrap">
+            <span class="rotulo">Ordenar por</span>
+            <button class="btn mini" :class="ordem === 'recente' ? '' : 'claro'"
+                    @click="ordem = 'recente'">acesso recente</button>
+            <button class="btn mini" :class="ordem === 'uso' ? '' : 'claro'"
+                    @click="ordem = 'uso'">mais uso</button>
+            <button class="btn mini" :class="ordem === 'parado' ? '' : 'claro'"
+                    @click="ordem = 'parado'">sumidos</button>
+            <button class="btn mini" :class="ordem === 'nome' ? '' : 'claro'"
+                    @click="ordem = 'nome'">nome</button>
+          </div>
           </div>
           <div class="tabela-rolagem">
             <table>
               <thead>
                 <tr><th>Família</th><th>Plano</th><th>Situação</th>
+                    <th>Uso</th><th>Último acesso</th>
                     <th>Válida até</th><th class="direita">Pessoas</th><th></th></tr>
               </thead>
               <tbody>
-                <tr v-for="c in resumo.casas" :key="c.id">
+                <tr v-for="c in casasFiltradas" :key="c.id">
                   <td>
                     <strong>{{ c.nome }}</strong>
-                    <div class="pequeno mudo">desde {{ dataBr(c.criado_em) }}</div>
+                    <div v-if="c.dono_email" class="pequeno num"
+                         style="color:var(--tinta-70)">
+                      {{ c.dono_email }}
+                    </div>
+                    <div class="pequeno mudo">
+                      desde {{ dataBr(c.criado_em) }}
+                      <button v-if="c.membros && c.membros.length > 1"
+                              class="botao-texto" @click="alternarMembros(c.id)">
+                        +{{ c.membros.length - 1 }} pessoa(s)
+                      </button>
+                    </div>
+
+                    <div v-if="familiasAbertas.includes(c.id)" class="membros">
+                      <div v-for="m in c.membros" :key="m.email" class="membro">
+                        <i class="mi" style="font-size:14px;vertical-align:-2px">
+                          {{ m.papel === 'dono' ? 'shield_person' : 'person' }}
+                        </i>
+                        <span class="num">{{ m.email }}</span>
+                        <span class="mudo"> · {{ m.papel }}</span>
+                      </div>
+                    </div>
                   </td>
                   <td style="min-width:150px">
                     <select :value="c.plano_id ?? ''" style="font-size:.8rem;padding:5px 8px"
@@ -274,6 +364,32 @@ onMounted(carregar)
                       {{ rotuloPlano[c.plano] ?? c.plano }}
                     </span>
                   </td>
+                  <td style="min-width:130px">
+                    <div class="entre" style="gap:8px">
+                      <strong class="num pequeno" :style="{ color: corDoUso(c.uso_pct) }">
+                        {{ c.uso_pct }}%
+                      </strong>
+                      <span class="pequeno mudo">{{ c.uso_usadas }}/{{ c.uso_total }}</span>
+                    </div>
+                    <div class="barra-meta" style="margin-top:5px">
+                      <i :style="{ width: c.uso_pct + '%',
+                                   background: corDoUso(c.uso_pct) }"></i>
+                    </div>
+                    <div v-if="c.uso_faltando && c.uso_faltando.length"
+                         class="pequeno mudo" style="margin-top:4px"
+                         :title="c.uso_faltando.join(', ')">
+                      não usa: {{ c.uso_faltando.slice(0, 2).join(', ')
+                        }}{{ c.uso_faltando.length > 2 ? '…' : '' }}
+                    </div>
+                  </td>
+
+                  <td class="pequeno" style="min-width:110px">
+                    <strong :class="desdeQuando(c.ultimo_acesso).dias > 14 ? 'saida' : ''">
+                      {{ desdeQuando(c.ultimo_acesso).texto }}
+                    </strong>
+                    <div class="mudo">{{ c.gastos_lancados }} gasto(s)</div>
+                  </td>
+
                   <td class="num pequeno">
                     {{ dataBr(c.plano === 'teste' ? c.teste_ate : c.assinatura_ate) }}
                   </td>
@@ -407,7 +523,7 @@ onMounted(carregar)
                 <div class="pequeno mudo">{{ p.descricao || 'Sem descrição' }}</div>
               </div>
               <div class="direita">
-                <div class="selo-valor" style="font-size:1.3rem">{{ dinheiro(p.preco) }}</div>
+                <div class="selo-valor" style="font-size:1.3rem">{{ valor(p.preco) }}</div>
                 <div class="pequeno mudo">por mês</div>
               </div>
             </div>
@@ -541,6 +657,16 @@ onMounted(carregar)
 </template>
 
 <style scoped>
+.membros {
+  margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--linha);
+  display: grid; gap: 5px;
+}
+.membro { font-size: .78rem; color: var(--tinta-70); }
+.botao-texto {
+  background: none; border: 0; padding: 0; font: inherit; font-size: .74rem;
+  color: var(--laranja); text-decoration: underline; cursor: pointer;
+}
+
 .gaveta {
   border: 1px solid var(--linha); border-radius: 8px;
   overflow: hidden; margin-top: 4px;

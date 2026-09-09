@@ -16,6 +16,16 @@ Endereço: `https://nprojeto.github.io/sowwell/`
 Altere `app.baseURL` no `nuxt.config.ts` para `/novo-nome/` e o segredo
 `SITE_URL` no Supabase. Os caminhos de imagem se ajustam sozinhos.
 
+## Antes de publicar o servidor
+
+```
+python3 testar_rotas.py
+```
+
+Monta um Supabase de mentira e chama todas as rotas. Pega variável que
+ficou faltando depois de uma edição — o TypeScript não acusa isso, e o
+erro só apareceria para o usuário na tela.
+
 ## Páginas
 
 | Rota | O que faz |
