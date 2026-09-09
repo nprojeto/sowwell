@@ -360,7 +360,7 @@ defineExpose({ editar, novoManual, carregarApoio })
 
       <div class="resumo-voz">
         <div>
-          <div class="selo-valor saida">{{ dinheiro(totalDaCompra) }}</div>
+          <div class="selo-valor saida">{{ valor(totalDaCompra) }}</div>
           <div class="pequeno" style="margin-top:2px">
             <strong>{{ form.descricao || 'Sem descrição' }}</strong>
             <span class="mudo"> · {{ rotuloForma[form.forma] }}</span>
@@ -372,7 +372,7 @@ defineExpose({ editar, novoManual, carregarApoio })
               · {{ cartaoEscolhido.nome }} ••{{ cartaoEscolhido.ultimos4 }}
             </span>
             <span v-if="valeEscolhido" class="mudo">
-              · sobra {{ dinheiro(sobraNoVale) }}
+              · sobra {{ valor(sobraNoVale) }}
             </span>
           </div>
         </div>
@@ -464,10 +464,10 @@ defineExpose({ editar, novoManual, carregarApoio })
         <div class="campo">
           <label>Fica assim</label>
           <div class="num saida" style="font-size:1.2rem;padding-top:5px">
-            {{ dinheiro(totalDaCompra) }}
+            {{ valor(totalDaCompra) }}
             <span v-if="form.forma === 'credito' && Number(form.parcelas) > 1"
                   class="pequeno mudo">
-              = {{ form.parcelas }}× {{ dinheiro(valorDaParcela) }}
+              = {{ form.parcelas }}× {{ valor(valorDaParcela) }}
             </span>
           </div>
         </div>

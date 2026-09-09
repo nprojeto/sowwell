@@ -85,7 +85,7 @@ onMounted(carregar)
               dos meses anteriores, mais o que entrou menos o que saiu.
             </template>
             <template v-else>
-              O que já entrou menos o que já saiu.
+              O que você confirmou que entrou, menos o que já saiu.
             </template>
           </div>
         </div>
@@ -110,6 +110,17 @@ onMounted(carregar)
             de faturas dos próximos meses.
           </div>
         </div>
+      </div>
+
+      <div v-if="resumo.entradas_sem_baixa_qtd" class="aviso entre"
+           style="margin-bottom:16px">
+        <span>
+          <strong>{{ resumo.entradas_sem_baixa_qtd }} entrada(s)</strong> já
+          venceram e ainda não foram confirmadas
+          (<span class="num">{{ dinheiro(resumo.entradas_sem_baixa_valor) }}</span>).
+          Elas só entram no caixa depois que você der baixa.
+        </span>
+        <NuxtLink to="/calendario" class="btn claro mini">Confirmar</NuxtLink>
       </div>
 
       <div v-if="Number(resumo.pendente_anterior)" class="aviso entre"

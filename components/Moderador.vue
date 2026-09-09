@@ -35,7 +35,11 @@ async function carregar() {
     if (!temRecurso.value) return
 
     dados.value = await api.get(`/moderando?mes=${hojeISO().slice(0, 7)}`)
-    if (!mexeu.value) meuLimite.value = Math.floor(sugerido.value)
+    // o limite que a pessoa escolheu manda; sem escolha, o sugerido
+    if (!mexeu.value) {
+      meuLimite.value = Math.floor(
+        Number(dados.value?.limite_escolhido ?? sugerido.value) || 0)
+    }
   } catch (e: any) {
     // O servidor também barra o que está fora do plano. Sem tratar isso
     // aqui, o bloco simplesmente sumia da tela — e some é pior que
@@ -50,11 +54,17 @@ async function carregar() {
   }
 }
 
+const guardado = ref(false)
+
 async function guardarLimite() {
   salvando.value = true
+  erro.value = ''
   try {
-    await api.patch('/config', { limite_diario: meuLimite.value })
+    await api.patch('/config', { limite_diario: String(meuLimite.value) })
+    mexeu.value = false
+    guardado.value = true
     await carregar()
+    setTimeout(() => (guardado.value = false), 2500)
   } catch (e: any) { erro.value = e.message }
   salvando.value = false
 }
@@ -165,10 +175,20 @@ onMounted(carregar)
         </template>
       </div>
 
-      <button v-if="mexeu" class="btn mini" style="margin-top:10px"
-              :disabled="salvando" @click="guardarLimite">
-        {{ salvando ? 'Guardando…' : 'Usar este limite' }}
-      </button>
+      <div class="linha-flex" style="margin-top:10px">
+        <button v-if="mexeu" class="btn mini"
+                :disabled="salvando" @click="guardarLimite">
+          {{ salvando ? 'Guardando…' : 'Usar este limite' }}
+        </button>
+        <span v-else-if="guardado" class="pequeno entrada">
+          <i class="mi" style="font-size:15px">check</i> Limite guardado.
+        </span>
+        <span v-else-if="dados?.limite_escolhido" class="pequeno mudo">
+          Seu limite: {{ dinheiro(dados.limite_escolhido) }} por dia
+        </span>
+      </div>
+
+      <div v-if="erro" class="aviso mal pequeno" style="margin-top:10px">{{ erro }}</div>
     </div>
   </div>
 </template>

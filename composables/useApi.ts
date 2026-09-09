@@ -16,7 +16,7 @@ export function useSupa(): SupabaseClient {
 
 // Versão do servidor que este site espera encontrar.
 // Se não bater, o aviso aparece no topo em vez de erros soltos.
-export const VERSAO_ESPERADA = '6.9'
+export const VERSAO_ESPERADA = '7.1'
 
 export function useApi() {
   const cfg = useRuntimeConfig()
@@ -109,13 +109,18 @@ export function arquivo(nome: string) {
 }
 
 /* ------------------------------------------------------------ formato */
-// Todo valor em dinheiro passa por aqui. Com o sigilo ligado, some
-// em toda parte de uma vez — sem precisar mexer em cada tela.
+// Valores da família: escondem quando o olho está fechado.
 export const dinheiro = (v: any) => {
   if (sigilo.value) return 'R$ ••••'
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
-    .format(Number(v || 0))
+  return valor(v)
 }
+
+// Valores que NÃO expõem ninguém: o que a pessoa está digitando agora,
+// preços de plano, exemplos. Esconder isso só atrapalharia — quem está
+// de fora não descobre nada olhando o preço de um plano.
+export const valor = (v: any) =>
+  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
+    .format(Number(v || 0))
 
 export const dataBr = (d: any) => {
   if (!d) return '—'

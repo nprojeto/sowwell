@@ -142,15 +142,42 @@ async function moverCasa(casa: any, planoId: string) {
   } catch (e: any) { erro.value = e.message }
 }
 
-async function estender(casa: any) {
-  const dias = prompt(`Quantos dias de cortesia para "${casa.nome}"?`, '30')
-  if (!dias) return
+const prazo = ref<any>(null)
+const dataPrazo = ref('')
+const salvandoPrazo = ref(false)
+
+function abrirPrazo(casa: any) {
+  prazo.value = casa
+  dataPrazo.value = String(casa.valido_ate ?? '').slice(0, 10) || hojeISO()
+  erro.value = ''
+}
+
+async function mexerPrazo(corpo: any, aviso: string) {
+  if (!prazo.value) return
+  salvandoPrazo.value = true
   try {
-    await api.post(`/admin/casas/estender/${casa.id}`, { dias: Number(dias) })
-    recado.value = 'Prazo estendido.'
+    const r = await api.post(`/admin/casas/estender/${prazo.value.id}`, corpo)
+    recado.value = `${aviso} Vale até ${dataBr(r.valido_ate)}.`
+    prazo.value = null
     await carregar()
-    setTimeout(() => (recado.value = ''), 3000)
+    setTimeout(() => (recado.value = ''), 4000)
   } catch (e: any) { erro.value = e.message }
+  salvandoPrazo.value = false
+}
+
+const somar = (d: number) =>
+  mexerPrazo({ dias: d }, `${d} dia(s) somados.`)
+
+const tirar = (d: number) =>
+  mexerPrazo({ dias: -d }, `${d} dia(s) retirados.`)
+
+const fixarData = () =>
+  mexerPrazo({ ate: dataPrazo.value }, 'Prazo definido.')
+
+async function encerrarAgora() {
+  if (!confirm(`Encerrar o acesso de "${prazo.value.nome}" hoje?\n\n`
+    + 'A família continua vendo tudo o que registrou, mas para de lançar.')) return
+  await mexerPrazo({ encerrar: true }, 'Acesso encerrado.')
 }
 
 function copiar(texto: string) {
@@ -252,14 +279,79 @@ onMounted(carregar)
                   </td>
                   <td class="direita num">{{ c.pessoas }}</td>
                   <td class="direita">
-                    <button class="btn claro mini" @click="estender(c)">Dar prazo</button>
+                    <button class="btn claro mini" @click="abrirPrazo(c)">Prazo</button>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
-      </template>
+          <!-- mexer no prazo de uma família -->
+    <div v-if="prazo" class="veu" @click.self="prazo = null">
+      <div class="painel" style="max-width:460px">
+        <div class="painel-topo">
+          <h2>Prazo de {{ prazo.nome }}</h2>
+          <button class="fechar" @click="prazo = null"><i class="mi">close</i></button>
+        </div>
+
+        <div class="painel-corpo">
+          <div class="cartao" style="margin-bottom:18px">
+            <div class="entre">
+              <div>
+                <div class="rotulo">Vale até</div>
+                <div class="num" style="font-size:1.15rem">
+                  {{ prazo.valido_ate ? dataBr(prazo.valido_ate) : 'sem prazo' }}
+                </div>
+              </div>
+              <span class="eti" :class="prazo.em_dia ? 'pago' : 'atrasado'">
+                {{ prazo.em_dia
+                  ? (prazo.dias_restantes + ' dia(s)')
+                  : 'vencida' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="rotulo" style="margin-bottom:8px">Somar dias</div>
+          <div class="linha-flex" style="flex-wrap:wrap;margin-bottom:18px">
+            <button v-for="d in [7, 15, 30, 90, 365]" :key="'m' + d"
+                    class="btn mini" :disabled="salvandoPrazo" @click="somar(d)">
+              +{{ d }}
+            </button>
+          </div>
+
+          <div class="rotulo" style="margin-bottom:8px">Tirar dias</div>
+          <div class="linha-flex" style="flex-wrap:wrap;margin-bottom:18px">
+            <button v-for="d in [7, 15, 30, 90]" :key="'t' + d"
+                    class="btn claro mini" :disabled="salvandoPrazo" @click="tirar(d)">
+              −{{ d }}
+            </button>
+          </div>
+
+          <div class="rotulo" style="margin-bottom:8px">Ou definir a data</div>
+          <div class="linha-flex" style="margin-bottom:18px">
+            <input v-model="dataPrazo" type="date" />
+            <button class="btn mini" :disabled="salvandoPrazo" @click="fixarData">
+              Definir
+            </button>
+          </div>
+
+          <div v-if="erro" class="aviso mal" style="margin-bottom:14px">{{ erro }}</div>
+
+          <div class="aviso pequeno">
+            Somar dias a uma família vencida conta a partir de hoje, não da
+            data antiga — senão o acesso não voltaria.
+          </div>
+        </div>
+
+        <div class="painel-pe" style="justify-content:space-between">
+          <button class="btn risco mini" :disabled="salvandoPrazo" @click="encerrarAgora">
+            Encerrar hoje
+          </button>
+          <button class="btn claro" @click="prazo = null">Fechar</button>
+        </div>
+      </div>
+    </div>
+</template>
 
       <!-- ================= PLANOS ================= -->
       <template v-else-if="aba === 'planos'">

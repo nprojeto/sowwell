@@ -42,7 +42,7 @@ function resolve(plano: any) {
 
 async function assinar(plano: any) {
   erro.value = ''
-  if (!confirm(`Pagar ${dinheiro(plano.preco)} pelo próximo mês no plano "${plano.nome}"?`)) return
+  if (!confirm(`Pagar ${valor(plano.preco)} pelo próximo mês no plano "${plano.nome}"?`)) return
   assinando.value = plano.id
   try {
     const r = await api.post('/assinatura/checkout', { plano_id: plano.id })
@@ -82,7 +82,7 @@ onMounted(carregar)
             <div class="rotulo">Seu plano hoje</div>
             <h2>{{ dados.plano_atual.nome }}</h2>
             <div class="pequeno mudo">
-              {{ dinheiro(dados.plano_atual.preco) }}/mês ·
+              {{ valor(dados.plano_atual.preco) }}/mês ·
               até {{ dados.plano_atual.max_pessoas }} pessoa(s)
             </div>
           </div>
@@ -147,7 +147,7 @@ onMounted(carregar)
             </span>
           </div>
 
-          <div class="preco">{{ dinheiro(p.preco) }}<span class="mudo">/mês</span></div>
+          <div class="preco">{{ valor(p.preco) }}<span class="mudo">/mês</span></div>
           <div class="pequeno mudo">{{ p.descricao || '\u00A0' }}</div>
 
           <div class="regua-latao" style="margin:14px 0;opacity:.3"></div>
