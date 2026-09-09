@@ -15,10 +15,21 @@ const restante = computed(() => Number(dados.value?.restante ?? 0))
 const gastoHoje = computed(() => Number(dados.value?.gasto_hoje ?? 0))
 const limiteHoje = computed(() => Number(dados.value?.limite_hoje ?? 0))
 
-const sobra = computed(() => limiteHoje.value - gastoHoje.value)
+// O limite que vale agora é o da barra: mexer nela precisa mudar o
+// número de cima na hora, senão a pessoa não vê efeito nenhum e acha
+// que o controle não funciona.
+const limiteAtivo = computed(() =>
+  meuLimite.value > 0 ? meuLimite.value : limiteHoje.value)
+
+const sobra = computed(() => limiteAtivo.value - gastoHoje.value)
 const passou = computed(() => sobra.value < 0)
 
-const maxSlider = computed(() => Math.max(50, Math.ceil(sugerido.value * 2 / 10) * 10))
+// vai bem acima do sugerido: quem quer afrouxar o limite num mês
+// atípico precisa conseguir subir a barra
+const maxSlider = computed(() => {
+  const base = Math.max(sugerido.value, gastoHoje.value, restante.value / 3, 50)
+  return Math.max(50, Math.ceil((base * 2) / 10) * 10)
+})
 
 // Se eu segurar neste ritmo, com quanto termino o mês?
 const economia = computed(() => {
@@ -122,10 +133,10 @@ onMounted(carregar)
             <strong class="saida">{{ dinheiro(-sobra) }}</strong>
           </template>
           <template v-else-if="gastoHoje">
-            Já gastou {{ dinheiro(gastoHoje) }} de {{ dinheiro(limiteHoje) }}
+            Já gastou {{ dinheiro(gastoHoje) }} de {{ dinheiro(limiteAtivo) }}
           </template>
           <template v-else>
-            De {{ dinheiro(limiteHoje) }} previstos para hoje
+            De {{ dinheiro(limiteAtivo) }} previstos para hoje
           </template>
         </div>
       </div>

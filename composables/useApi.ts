@@ -16,7 +16,7 @@ export function useSupa(): SupabaseClient {
 
 // Versão do servidor que este site espera encontrar.
 // Se não bater, o aviso aparece no topo em vez de erros soltos.
-export const VERSAO_ESPERADA = '7.3'
+export const VERSAO_ESPERADA = '7.4'
 
 export function useApi() {
   const cfg = useRuntimeConfig()
