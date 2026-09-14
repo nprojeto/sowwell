@@ -432,13 +432,35 @@ defineExpose({ editar, novoManual, carregarApoio })
         </div>
       </div>
 
+      <!-- vale-benefício: escolher de qual vale saiu -->
+      <div v-if="ehVale" class="campo">
+        <label>Qual vale *</label>
+        <select ref="seletorCartao" v-model="form.cartao_id"
+                :style="cartaoObrigatorio ? 'border-color:var(--laranja);outline:2px solid var(--laranja)' : ''">
+          <option value="">— escolha —</option>
+          <option v-for="c in deBeneficio" :key="c.id" :value="c.id">
+            {{ c.nome }} ••{{ c.ultimos4 }} — saldo {{ valor(c.saldo) }}
+          </option>
+        </select>
+        <div v-if="valeEscolhido" class="pequeno mudo" style="margin-top:6px">
+          Saldo hoje: <strong class="num">{{ valor(valeEscolhido.saldo) }}</strong>
+          <span v-if="totalDaCompra > 0">
+            → depois deste gasto:
+            <strong class="num" :class="sobraNoVale < 0 ? 'saida' : 'entrada'">
+              {{ valor(sobraNoVale) }}
+            </strong>
+          </span>
+        </div>
+      </div>
+
+      <!-- crédito: só cartões de crédito, nunca vales -->
       <div v-if="form.forma === 'credito'" class="grade g3">
         <div class="campo">
           <label>Cartão *</label>
           <select ref="seletorCartao" v-model="form.cartao_id"
-                  :style="cartaoObrigatorio ? 'border-color:var(--latao);outline:2px solid var(--latao)' : ''">
+                  :style="cartaoObrigatorio ? 'border-color:var(--laranja);outline:2px solid var(--laranja)' : ''">
             <option value="">— escolha —</option>
-            <option v-for="c in cartoes" :key="c.id" :value="c.id">
+            <option v-for="c in deCredito" :key="c.id" :value="c.id">
               {{ c.nome }} ••{{ c.ultimos4 }}
             </option>
           </select>
