@@ -1,6 +1,29 @@
 <script setup lang="ts">
 const api = useApi()
+const supa = useSupa()
 const { noApp } = useApp()
+
+const excluindo = ref(false)
+const textoExclusao = ref('')
+const apagando = ref(false)
+
+const podeExcluir = computed(() =>
+  textoExclusao.value.trim().toLowerCase()
+    === String(dados.value?.conta?.nome ?? '').trim().toLowerCase())
+
+async function excluirTudo() {
+  apagando.value = true
+  erro.value = ''
+  try {
+    await api.post('/conta/excluir', { confirmacao: textoExclusao.value })
+    limparRecursos()
+    await supa.auth.signOut()
+    await navigateTo('/login')
+  } catch (e: any) {
+    erro.value = e.message
+    apagando.value = false
+  }
+}
 
 const dados = ref<any>(null)
 const carregando = ref(true)
@@ -165,7 +188,43 @@ onMounted(async () => {
             <div class="pequeno mudo">
               <template v-if="plano === 'teste'">
                 Teste até {{ dataBr(dados.conta.teste_ate) }}
-              </template>
+                  <!-- excluir a conta -->
+    <div class="cartao larga" style="margin-top:16px;border-left:3px solid var(--saida)">
+      <h2 style="margin-bottom:4px">Excluir a conta</h2>
+      <p class="pequeno mudo" style="margin:0 0 12px">
+        <template v-if="dados && dados.sou_dono">
+          Apaga a família inteira: contas, gastos, cartões, vales, reservas
+          e os acessos de todos os mordomos. Não tem como desfazer.
+        </template>
+        <template v-else>
+          Apaga o seu acesso. Os dados da família continuam com os demais
+          mordomos.
+        </template>
+      </p>
+
+      <button v-if="!excluindo" class="btn risco mini" @click="excluindo = true">
+        <i class="mi">delete_forever</i>Quero excluir
+      </button>
+
+      <div v-else class="aviso mal">
+        <strong>Isto não tem volta.</strong>
+        Para confirmar, digite o nome da família —
+        <strong>{{ dados && dados.conta ? dados.conta.nome : '' }}</strong>
+        — no campo abaixo.
+
+        <div class="linha-flex" style="margin-top:12px">
+          <input v-model="textoExclusao" placeholder="Nome da família" />
+          <button class="btn risco" :disabled="!podeExcluir || apagando"
+                  @click="excluirTudo">
+            {{ apagando ? 'Apagando…' : 'Apagar tudo' }}
+          </button>
+          <button class="btn claro" @click="excluindo = false; textoExclusao = ''">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+</template>
 
 <style scoped>
 .foto-familia {

@@ -217,9 +217,11 @@ async function reenviar() {
       </template>
     </div>
 
-    <a class="rodape-privacidade" href="/sowwell/privacidade.html" target="_blank">
-      Política de privacidade
-    </a>
+    <div class="rodape-privacidade">
+      <a href="/sowwell/privacidade.html" target="_blank">Privacidade</a>
+      ·
+      <a href="/sowwell/excluir-conta.html" target="_blank">Excluir conta</a>
+    </div>
   </div>
 </template>
 

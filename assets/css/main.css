@@ -634,8 +634,9 @@ input:disabled, select:disabled { background: var(--papel); color: var(--tinta-4
 
 .rodape-privacidade {
   position: absolute; bottom: 18px; left: 0; right: 0; text-align: center;
-  color: rgba(255,255,255,.85); font-size: .78rem; text-decoration: underline;
+  color: rgba(255,255,255,.8); font-size: .78rem;
 }
+.rodape-privacidade a { color: rgba(255,255,255,.9); text-decoration: underline; }
 
 /* --------------------------------------------------------- balão do menu */
 .balao-fundo { position: fixed; inset: 0; z-index: 70; }
