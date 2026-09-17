@@ -100,6 +100,10 @@ async function entrar() {
         <NuxtLink to="/criar-conta"><strong>Criar agora</strong></NuxtLink>
       </div>
     </div>
+
+    <a class="rodape-privacidade" href="/sowwell/privacidade.html" target="_blank">
+      Política de privacidade
+    </a>
   </div>
 </template>
 
