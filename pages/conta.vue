@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const api = useApi()
+const { noApp } = useApp()
 
 const dados = ref<any>(null)
 const carregando = ref(true)
@@ -185,11 +186,11 @@ onMounted(async () => {
             <div v-if="preco" class="pequeno mudo" style="margin-bottom:6px">
               {{ dinheiro(preco) }}/mês
             </div>
-            <button v-if="podePagar && plano !== 'ativo'" class="btn latao"
+            <button v-if="!noApp && podePagar && plano !== 'ativo'" class="btn latao"
                     :disabled="assinando || !dados.sou_dono" @click="assinar">
               {{ assinando ? 'Abrindo…' : 'Pagar o próximo mês' }}
             </button>
-            <button v-else-if="podePagar && plano === 'ativo' && !semPrazo"
+            <button v-else-if="!noApp && podePagar && plano === 'ativo' && !semPrazo"
                     class="btn claro" :disabled="conferindo" @click="conferirPagamento">
               {{ conferindo ? 'Conferindo…' : 'Atualizar situação' }}
             </button>
@@ -201,7 +202,7 @@ onMounted(async () => {
             O acesso expirou. Você ainda consegue consultar tudo, mas não dá
             para lançar nada novo até renovar.
           </span>
-          <button v-if="podePagar" class="btn claro mini" :disabled="conferindo"
+          <button v-if="!noApp && podePagar" class="btn claro mini" :disabled="conferindo"
                   @click="conferirPagamento">
             {{ conferindo ? 'Conferindo…' : 'Já paguei' }}
           </button>
@@ -213,7 +214,7 @@ onMounted(async () => {
 
         <div v-if="!semPrazo" class="entre pequeno mudo" style="margin-top:14px">
           <span>
-            <template v-if="podePagar">
+            <template v-if="!noApp && podePagar">
               Pagamento mensal avulso — Pix, boleto ou cartão.
               Nada é debitado automaticamente.
             </template>

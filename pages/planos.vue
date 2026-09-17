@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const api = useApi()
 const rota = useRoute()
+const { noApp } = useApp()
 
 const dados = ref<any>(null)
 const carregando = ref(true)
@@ -62,6 +63,20 @@ onMounted(carregar)
       <p>Escolha o que a sua família precisa.</p>
     </div>
 
+    <div v-if="noApp" class="cartao larga" style="margin-bottom:16px;
+         border-left:3px solid var(--laranja)">
+      <div class="linha-flex" style="gap:12px">
+        <span class="trancado-cadeado"><i class="mi">devices</i></span>
+        <div>
+          <strong>A assinatura é feita no site.</strong>
+          <div class="pequeno mudo">
+            Entre em sowwell no seu computador ou navegador para ver os planos
+            e contratar. O acesso liberado lá aparece aqui na hora.
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div v-if="motivo && nomeRecurso" class="aviso" style="margin-bottom:16px">
       <strong>{{ nomeRecurso }}</strong> não faz parte do seu plano atual.
       Os planos abaixo que incluem essa parte estão marcados.
@@ -102,13 +117,13 @@ onMounted(carregar)
           </div>
         </div>
 
-        <div v-if="emTeste" class="aviso" style="margin-top:14px">
+        <div v-if="emTeste && !noApp" class="aviso" style="margin-top:14px">
           <div class="entre" style="flex-wrap:wrap;gap:12px">
             <span>
               Você está no período de teste. Não precisa fazer nada agora —
               se pagar antes, o mês comprado começa quando o teste acabar.
             </span>
-            <button class="btn latao mini"
+            <button v-if="!noApp" class="btn latao mini"
                     :disabled="assinando === dados.plano_atual.id
                       || !dados.pagamento_disponivel"
                     @click="assinar({ ...dados.plano_atual, id: dados.plano_atual.id })">
@@ -117,10 +132,10 @@ onMounted(carregar)
           </div>
         </div>
 
-        <div v-else-if="!dados.em_dia" class="aviso mal" style="margin-top:14px">
+        <div v-else-if="!dados.em_dia && !noApp" class="aviso mal" style="margin-top:14px">
           <div class="entre" style="flex-wrap:wrap;gap:12px">
             <span>Seu acesso para lançar está pausado. Renove para voltar.</span>
-            <button class="btn latao mini"
+            <button v-if="!noApp" class="btn latao mini"
                     :disabled="assinando === dados.plano_atual.id
                       || !dados.pagamento_disponivel"
                     @click="assinar({ ...dados.plano_atual, id: dados.plano_atual.id })">
@@ -147,7 +162,7 @@ onMounted(carregar)
             </span>
           </div>
 
-          <div class="preco">{{ valor(p.preco) }}<span class="mudo">/mês</span></div>
+          <div v-if="!noApp" class="preco">{{ valor(p.preco) }}<span class="mudo">/mês</span></div>
           <div class="pequeno mudo">{{ p.descricao || '\u00A0' }}</div>
 
           <div class="regua-latao" style="margin:14px 0;opacity:.3"></div>
@@ -170,12 +185,12 @@ onMounted(carregar)
             </li>
           </ul>
 
-          <button v-if="!p.atual" class="btn latao" style="width:100%;margin-top:16px"
+          <button v-if="!noApp && !p.atual" class="btn latao" style="width:100%;margin-top:16px"
                   :disabled="assinando === p.id || !p.disponivel || !dados.pagamento_disponivel"
                   @click="assinar(p)">
             {{ assinando === p.id ? 'Abrindo…' : 'Contratar' }}
           </button>
-          <button v-else-if="emTeste || !dados.em_dia"
+          <button v-else-if="!noApp && (emTeste || !dados.em_dia)"
                   class="btn latao" style="width:100%;margin-top:16px"
                   :disabled="assinando === p.id || !p.disponivel || !dados.pagamento_disponivel"
                   @click="assinar(p)">
@@ -192,7 +207,7 @@ onMounted(carregar)
         </div>
       </div>
 
-      <div class="cartao" style="margin-top:16px">
+      <div v-if="!noApp" class="cartao" style="margin-top:16px">
         <div class="pequeno mudo">
           Pagamento mensal pelo Mercado Pago — <strong>Pix, boleto ou cartão</strong>,
           sem precisar de conta lá. Não há cobrança automática: nada é debitado

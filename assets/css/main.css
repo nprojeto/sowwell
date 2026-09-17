@@ -621,6 +621,14 @@ input:disabled, select:disabled { background: var(--papel); color: var(--tinta-4
   position: absolute; top: 8px; right: 9px; font-size: 13px; color: var(--tinta-45);
 }
 
+/* selo redondo usado em avisos com ícone */
+.trancado-cadeado {
+  width: 40px; height: 40px; flex: 0 0 40px; border-radius: 13px;
+  background: var(--laranja-fundo); color: var(--laranja);
+  display: grid; place-items: center;
+}
+.trancado-cadeado .mi { font-size: 20px; vertical-align: 0; }
+
 /* valores de exemplo cobertos, em blocos fora do plano */
 .coberto { filter: blur(6px); user-select: none; pointer-events: none; opacity: .55; }
 

@@ -1,0 +1,53 @@
+{
+  "name": "Sow Well Everyday",
+  "short_name": "Sow Well",
+  "description": "O controle financeiro da família: contas, gastos, cartões e reservas.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "/sowwell/?origem=app",
+  "scope": "/sowwell/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FF8A00",
+  "categories": ["finance", "productivity"],
+  "icons": [
+    {
+      "src": "/sowwell/icone-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/sowwell/icone-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/sowwell/icone-mascara-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/sowwell/icone-mascara-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Gastei agora",
+      "short_name": "Gastei",
+      "url": "/sowwell/gastos?origem=app",
+      "icons": [{ "src": "/sowwell/icone-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Painel",
+      "url": "/sowwell/?origem=app",
+      "icons": [{ "src": "/sowwell/icone-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
