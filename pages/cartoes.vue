@@ -257,57 +257,7 @@ onMounted(carregar)
             <template v-if="c.tipo === 'beneficio'">
               <div>Entra dia {{ c.dia_recarga }}</div>
               <div>{{ c.acumula ? 'Acumula' : 'Não acumula' }}</div>
-      <!-- dar baixa na fatura -->
-    <div v-if="quitando" class="veu" @click.self="quitando = null">
-      <div class="painel">
-        <div class="painel-topo">
-          <h2>Dar baixa na fatura</h2>
-          <button class="fechar" @click="quitando = null"><i class="mi">close</i></button>
-        </div>
-
-        <div class="painel-corpo">
-          <div class="cartao" style="margin-bottom:16px">
-            <div class="entre">
-              <div>
-                <strong>{{ quitando.cartao.nome }}</strong>
-                <div class="pequeno mudo">
-                  Fatura de {{ dataBr(quitando.competencia) }}
-                </div>
-              </div>
-              <div class="direita">
-                <div class="num saida" style="font-size:1.2rem">
-                  {{ dinheiro(quitando.valor) }}
-                </div>
-                <div v-if="quitando.vencimento" class="pequeno mudo">
-                  vence {{ dataBr(quitando.vencimento) }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="campo">
-            <label>Quando você pagou</label>
-            <input v-model="dataQuitacao" type="date" :max="hojeISO()" />
-          </div>
-
-          <div v-if="quitando.vencimento && dataQuitacao < quitando.vencimento"
-               class="aviso pequeno">
-            Pagamento antecipado. O valor sai do caixa em
-            {{ dataBr(dataQuitacao) }}, não no vencimento.
-          </div>
-
-          <div v-if="erro" class="aviso mal" style="margin-top:12px">{{ erro }}</div>
-        </div>
-
-        <div class="painel-pe">
-          <button class="btn claro" @click="quitando = null">Cancelar</button>
-          <button class="btn" :disabled="salvandoQuitacao" @click="quitar">
-            {{ salvandoQuitacao ? 'Guardando…' : 'Confirmar pagamento' }}
-          </button>
-        </div>
-      </div>
-    </div>
-</template>
+            </template>
             <template v-else>
               <div>Vira dia {{ c.dia_fechamento }}</div>
               <div>Vence dia {{ c.dia_vencimento }}</div>
@@ -593,6 +543,57 @@ onMounted(carregar)
       </div>
     </div>
   </div>
+
+    <!-- dar baixa na fatura -->
+    <div v-if="quitando" class="veu" @click.self="quitando = null">
+      <div class="painel">
+        <div class="painel-topo">
+          <h2>Dar baixa na fatura</h2>
+          <button class="fechar" @click="quitando = null"><i class="mi">close</i></button>
+        </div>
+
+        <div class="painel-corpo">
+          <div class="cartao" style="margin-bottom:16px">
+            <div class="entre">
+              <div>
+                <strong>{{ quitando.cartao.nome }}</strong>
+                <div class="pequeno mudo">
+                  Fatura de {{ dataBr(quitando.competencia) }}
+                </div>
+              </div>
+              <div class="direita">
+                <div class="num saida" style="font-size:1.2rem">
+                  {{ dinheiro(quitando.valor) }}
+                </div>
+                <div v-if="quitando.vencimento" class="pequeno mudo">
+                  vence {{ dataBr(quitando.vencimento) }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="campo">
+            <label>Quando você pagou</label>
+            <input v-model="dataQuitacao" type="date" :max="hojeISO()" />
+          </div>
+
+          <div v-if="quitando.vencimento && dataQuitacao < quitando.vencimento"
+               class="aviso pequeno">
+            Pagamento antecipado. O valor sai do caixa em
+            {{ dataBr(dataQuitacao) }}, não no vencimento.
+          </div>
+
+          <div v-if="erro" class="aviso mal" style="margin-top:12px">{{ erro }}</div>
+        </div>
+
+        <div class="painel-pe">
+          <button class="btn claro" @click="quitando = null">Cancelar</button>
+          <button class="btn" :disabled="salvandoQuitacao" @click="quitar">
+            {{ salvandoQuitacao ? 'Guardando…' : 'Confirmar pagamento' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 

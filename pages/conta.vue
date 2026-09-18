@@ -188,50 +188,7 @@ onMounted(async () => {
             <div class="pequeno mudo">
               <template v-if="plano === 'teste'">
                 Teste até {{ dataBr(dados.conta.teste_ate) }}
-                  <!-- excluir a conta -->
-    <div class="cartao larga" style="margin-top:16px;border-left:3px solid var(--saida)">
-      <h2 style="margin-bottom:4px">Excluir a conta</h2>
-      <p class="pequeno mudo" style="margin:0 0 12px">
-        <template v-if="dados && dados.sou_dono">
-          Apaga a família inteira: contas, gastos, cartões, vales, reservas
-          e os acessos de todos os mordomos. Não tem como desfazer.
-        </template>
-        <template v-else>
-          Apaga o seu acesso. Os dados da família continuam com os demais
-          mordomos.
-        </template>
-      </p>
-
-      <button v-if="!excluindo" class="btn risco mini" @click="excluindo = true">
-        <i class="mi">delete_forever</i>Quero excluir
-      </button>
-
-      <div v-else class="aviso mal">
-        <strong>Isto não tem volta.</strong>
-        Para confirmar, digite o nome da família —
-        <strong>{{ dados && dados.conta ? dados.conta.nome : '' }}</strong>
-        — no campo abaixo.
-
-        <div class="linha-flex" style="margin-top:12px">
-          <input v-model="textoExclusao" placeholder="Nome da família" />
-          <button class="btn risco" :disabled="!podeExcluir || apagando"
-                  @click="excluirTudo">
-            {{ apagando ? 'Apagando…' : 'Apagar tudo' }}
-          </button>
-          <button class="btn claro" @click="excluindo = false; textoExclusao = ''">
-            Cancelar
-          </button>
-        </div>
-      </div>
-    </div>
-</template>
-
-<style scoped>
-.foto-familia {
-  width: 84px; height: 84px; border-radius: 50%; object-fit: cover;
-  border: 2px solid var(--linha);
-}
-</style>
+              </template>
               <template v-else-if="dados.conta.assinatura_ate && !semPrazo">
                 Válida até {{ dataBr(dados.conta.assinatura_ate) }}
               </template>
@@ -242,7 +199,7 @@ onMounted(async () => {
             </div>
           </div>
           <div class="direita">
-            <div v-if="preco" class="pequeno mudo" style="margin-bottom:6px">
+            <div v-if="preco && !noApp" class="pequeno mudo" style="margin-bottom:6px">
               {{ dinheiro(preco) }}/mês
             </div>
             <button v-if="!noApp && podePagar && plano !== 'ativo'" class="btn latao"
@@ -277,7 +234,7 @@ onMounted(async () => {
               Pagamento mensal avulso — Pix, boleto ou cartão.
               Nada é debitado automaticamente.
             </template>
-            <template v-else>
+            <template v-else-if="!noApp">
               O pagamento ainda não foi configurado neste sistema.
             </template>
           </span>
@@ -404,7 +361,7 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div v-if="dados.assinatura?.pagamentos_pendentes"
+      <div v-if="!noApp && dados.assinatura?.pagamentos_pendentes"
            class="aviso entre" style="margin-bottom:16px">
         <span>
           Há {{ dados.assinatura.pagamentos_pendentes }} pagamento(s) aguardando.
@@ -418,7 +375,7 @@ onMounted(async () => {
       <div v-if="pagamentos.length" class="cartao chapa" style="margin-bottom:16px">
         <div class="cartao-topo">
           <h2>Pagamentos</h2>
-          <button class="btn claro mini" :disabled="conferindo" @click="conferirPagamento">
+          <button v-if="!noApp" class="btn claro mini" :disabled="conferindo" @click="conferirPagamento">
             {{ conferindo ? 'Conferindo…' : 'Conferir' }}
           </button>
         </div>
@@ -443,6 +400,64 @@ onMounted(async () => {
       </div>
 
 
+      <!-- suporte: vale no site e no app. Fica aqui, longe da assinatura,
+           de proposito: junto dela o Google leria como "contrate por fora". -->
+      <div class="cartao" style="margin-bottom:16px">
+        <div class="entre" style="flex-wrap:wrap;gap:12px">
+          <div>
+            <h2 style="margin-bottom:4px">Suporte</h2>
+            <div class="pequeno mudo">Dúvidas ou problemas? Fale com a gente.</div>
+          </div>
+          <a class="btn claro" style="text-decoration:none" href="https://wa.me/5512988007953"
+             target="_blank" rel="noopener">
+            <i class="mi">chat</i>WhatsApp (12) 98800-7953
+          </a>
+        </div>
+      </div>
+
+      <!-- excluir a conta -->
+      <div class="cartao larga" style="margin-top:16px;border-left:3px solid var(--saida)">
+        <h2 style="margin-bottom:4px">Excluir a conta</h2>
+        <p class="pequeno mudo" style="margin:0 0 12px">
+          <template v-if="dados && dados.sou_dono">
+            Apaga a família inteira: contas, gastos, cartões, vales, reservas
+            e os acessos de todos os mordomos. Não tem como desfazer.
+          </template>
+          <template v-else>
+            Apaga o seu acesso. Os dados da família continuam com os demais
+            mordomos.
+          </template>
+        </p>
+
+        <button v-if="!excluindo" class="btn risco mini" @click="excluindo = true">
+          <i class="mi">delete_forever</i>Quero excluir
+        </button>
+
+        <div v-else class="aviso mal">
+          <strong>Isto não tem volta.</strong>
+          Para confirmar, digite o nome da família —
+          <strong>{{ dados && dados.conta ? dados.conta.nome : '' }}</strong>
+          — no campo abaixo.
+
+          <div class="linha-flex" style="margin-top:12px">
+            <input v-model="textoExclusao" placeholder="Nome da família" />
+            <button class="btn risco" :disabled="!podeExcluir || apagando"
+                    @click="excluirTudo">
+              {{ apagando ? 'Apagando…' : 'Apagar tudo' }}
+            </button>
+            <button class="btn claro" @click="excluindo = false; textoExclusao = ''">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
     </template>
   </div>
 </template>
+
+<style scoped>
+.foto-familia {
+  width: 84px; height: 84px; border-radius: 50%; object-fit: cover;
+  border: 2px solid var(--linha);
+}
+</style>

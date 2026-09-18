@@ -68,10 +68,9 @@ onMounted(carregar)
       <div class="linha-flex" style="gap:12px">
         <span class="trancado-cadeado"><i class="mi">devices</i></span>
         <div>
-          <strong>A assinatura é feita no site.</strong>
+          <strong>Sua assinatura não é gerenciada por este aplicativo.</strong>
           <div class="pequeno mudo">
-            Entre em sowwell no seu computador ou navegador para ver os planos
-            e contratar. O acesso liberado lá aparece aqui na hora.
+            Aqui você vê o que cada plano inclui.
           </div>
         </div>
       </div>
@@ -97,7 +96,7 @@ onMounted(carregar)
             <div class="rotulo">Seu plano hoje</div>
             <h2>{{ dados.plano_atual.nome }}</h2>
             <div class="pequeno mudo">
-              {{ valor(dados.plano_atual.preco) }}/mês ·
+              <template v-if="!noApp">{{ valor(dados.plano_atual.preco) }}/mês ·</template>
               até {{ dados.plano_atual.max_pessoas }} pessoa(s)
             </div>
           </div>
@@ -197,11 +196,11 @@ onMounted(carregar)
             {{ assinando === p.id ? 'Abrindo…'
               : (emTeste ? 'Contratar agora' : 'Renovar') }}
           </button>
-          <div v-else class="pequeno mudo centro" style="margin-top:16px">
+          <div v-else-if="p.atual" class="pequeno mudo centro" style="margin-top:16px">
             É o que você usa hoje
           </div>
 
-          <div v-if="!p.disponivel && !p.atual" class="pequeno mudo centro" style="margin-top:6px">
+          <div v-if="!noApp && !p.disponivel && !p.atual" class="pequeno mudo centro" style="margin-top:6px">
             Sem preço definido — fale com o suporte
           </div>
         </div>
